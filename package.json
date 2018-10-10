@@ -1,5 +1,5 @@
 {
-  "name": "storex",
+  "name": "memex-stemmer",
   "version": "0.0.1",
   "description": "Storex core module - a storage layer without assumptions",
   "main": "lib/index.js",
