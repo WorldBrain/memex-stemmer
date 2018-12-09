@@ -1,7 +1,7 @@
 {
   "name": "memex-stemmer",
   "version": "0.0.1",
-  "description": "Storex core module - a storage layer without assumptions",
+  "description": "Storex stemmer used by Memex",
   "main": "lib/index.js",
   "typings": "lib/index",
   "scripts": {
