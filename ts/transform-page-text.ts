@@ -1,5 +1,5 @@
 const urlRegex = require('url-regex') // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
-import * as sw from 'remove-stopwords'
+const sw = require('remove-stopwords')
 import rmDiacritics from './remove-diacritics'
 
 import { DEFAULT_TERM_SEPARATOR } from './constants'

@@ -1,7 +1,7 @@
 /* eslint-env jest */
-import * as expect from 'expect'
+const expect = require('expect')
 import extractTerms from './'
-import * as DATA from './index.test.data'
+const DATA = require('./index.test.data')
 
 function testExtractTerms({ input, output = DATA.EXPECTED_TERMS }) {
     const result = extractTerms(input)
