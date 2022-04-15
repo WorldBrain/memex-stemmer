@@ -3,6 +3,7 @@ const sw = require('remove-stopwords')
 import rmDiacritics from './remove-diacritics'
 
 import { DEFAULT_TERM_SEPARATOR } from './constants'
+import type { TextTransformer } from './types'
 
 const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
 const allWhitespacesPattern = /\s+/g
@@ -49,7 +50,7 @@ const splitDashes = (text = '') => {
 
     // Split up dash-words, deriving new words to add to the text
     const newWords = matches
-        .map(match => match.split('-'))
+        .map((match) => match.split('-'))
         .reduce((a, b) => [...a, ...b])
         .join(' ')
 
@@ -68,13 +69,11 @@ const removeLongWords = (text = '') => text.replace(longWords, ' ')
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
  * puncation (although includes accented characters), numbers, and whitespace.
- * TODO: pass in options to disable certain functionality.
- *
- * @param {any} content A content string to transform.
- * @returns {any} Object containing the transformed `content` + less important
- *  `lengthBefore`, `lengthAfter` stats.
  */
-export default function transform({ text = '', lang = 'en' }) {
+export const transformPageText: TextTransformer = (
+    text,
+    { lang = 'en-US' },
+) => {
     // Short circuit if no text
     if (!text.trim().length) {
         return { text, lenAfter: 0, lenBefore: 0 }
@@ -117,5 +116,36 @@ export default function transform({ text = '', lang = 'en' }) {
         text: searchableText,
         lenBefore: text.length,
         lenAfter: searchableText.length,
+    }
+}
+
+export const transformListName: TextTransformer = (text) => {
+    // Short circuit if no text
+    if (!text.trim().length) {
+        return { text, lenAfter: 0, lenBefore: 0 }
+    }
+
+    let searchableName = text.toLocaleLowerCase()
+
+    // Removes ' from words effectively combining them
+    // Example O'Grady => OGrady
+    searchableName = combinePunctuation(searchableName)
+
+    // Splits words with - into separate words
+    // Example "chevron-right": "chevron right chevron-right"
+    searchableName = splitDashes(searchableName)
+
+    // Changes accented characters to regular letters
+    searchableName = removeDiacritics(searchableName)
+
+    searchableName = removeDupeWords(searchableName)
+
+    // We don't care about non-single-space whitespace (' ' is cool)
+    searchableName = cleanupWhitespaces(searchableName)
+
+    return {
+        text: searchableName,
+        lenBefore: text.length,
+        lenAfter: searchableName.length,
     }
 }

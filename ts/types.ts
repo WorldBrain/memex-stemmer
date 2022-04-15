@@ -98,3 +98,12 @@ export interface PipelineRes {
     screenshotURI?: string
     text: string
 }
+
+export type TextTransformer = (
+    text: string,
+    args?: { lang?: string },
+) => {
+    text: string
+    lenAfter: number
+    lenBefore: number
+}
