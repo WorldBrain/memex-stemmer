@@ -5,7 +5,7 @@ import rmDiacritics from './remove-diacritics'
 import { DEFAULT_TERM_SEPARATOR } from './constants'
 import type { TextTransformer } from './types'
 
-const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
+const termSeparator = DEFAULT_TERM_SEPARATOR
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
