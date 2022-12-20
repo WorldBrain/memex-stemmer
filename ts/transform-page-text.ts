@@ -11,7 +11,9 @@ const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{
 const apostrophePattern = /['’]/g
 const wantedDashPattern = /(\S+)-(\S+)/g
 const unwantedDashPattern = /\s+-\s+/g
+const unwantedDashPattern1 = /(\S+)-(\S+)/g
 const longWords = /\b\w{30,}\b/gi
+const singleCharacters = /(?<!\S).(?!\S)\s*/
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
 
@@ -65,6 +67,8 @@ const removeDiacritics = (text = '') => {
 const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
 
 const removeLongWords = (text = '') => text.replace(longWords, ' ')
+const removeSingleCharacters = (text = '') =>
+    text.replace(singleCharacters, ' ')
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -93,6 +97,10 @@ export const transformPageText: TextTransformer = (
     // Example "chevron-right": "chevron right chevron-right"
     searchableText = splitDashes(searchableText)
 
+    // replaces remaining dashes
+    searchableText = searchableText.replace(unwantedDashPattern, ' ')
+    searchableText = searchableText.replace(unwantedDashPattern1, ' ')
+
     // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
 
@@ -104,13 +112,17 @@ export const transformPageText: TextTransformer = (
     searchableText = removeRandomDigits(searchableText)
 
     // Removes 'stopwords' such as they'll, don't, however ect..
-    searchableText = removeUselessWords(searchableText, lang)
+    // searchableText = removeUselessWords(searchableText, lang)
+
+    // Removes 'stopwords' such as they'll, don't, however ect..
+    // searchableText = removeUselessWords(searchableText, lang)
+
+    // Removes all words 20+ characters long
+    // searchableText = removeLongWords(searchableText)
+    searchableText = removeSingleCharacters(searchableText)
 
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
-
-    // Removes all words 20+ characters long
-    searchableText = removeLongWords(searchableText)
 
     return {
         text: searchableText,
