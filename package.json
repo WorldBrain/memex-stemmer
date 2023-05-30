@@ -24,6 +24,7 @@
     "url": "https://github.com/WorldBrain/memex-stemmer.git"
   },
   "dependencies": {
+    "cheerio": "1.0.0-rc.6",
     "remove-stopwords": "^1.0.3",
     "url-regex": "^4.1.1"
   },
