@@ -76,7 +76,7 @@ const removeSingleCharacters = (text = '') =>
  */
 export const transformPageText: TextTransformer = (
     text,
-    { lang = 'en-US' },
+    { lang = 'en-US' } = {},
 ) => {
     // Short circuit if no text
     if (!text.trim().length) {
