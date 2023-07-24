@@ -13,7 +13,7 @@ const wantedDashPattern = /(\S+)-(\S+)/g
 const unwantedDashPattern = /\s+-\s+/g
 const unwantedDashPattern1 = /(\S+)-(\S+)/g
 const longWords = /\b\w{30,}\b/gi
-const singleCharacters = /(?<!\S).(?!\S)\s*/
+//const singleCharacters = /(?<!\S).(?!\S)\s*/
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
 
@@ -68,7 +68,10 @@ const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
 
 const removeLongWords = (text = '') => text.replace(longWords, ' ')
 const removeSingleCharacters = (text = '') =>
-    text.replace(singleCharacters, ' ')
+    text
+        .split(' ')
+        .filter((word) => word.length !== 1)
+        .join(' ')
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
