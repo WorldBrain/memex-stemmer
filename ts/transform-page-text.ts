@@ -96,8 +96,13 @@ function processCJKCharacters(input) {
     matches.forEach((match, idx) => {
         const startIdx = input.indexOf(match, lastIdx)
 
-        // append the segment from the last index to the start of this match
+        // Append the segment from the last index to the start of this match
         result += input.substring(lastIdx, startIdx)
+
+        // Add a space if the previous character is not a space and not at the start
+        if (startIdx > 0 && input[startIdx - 1] !== ' ') {
+            result += ' '
+        }
 
         // If the matched sequence is Han ideographs, separate them with space
         if (/[\u4E00-\u9FFF]+/.test(match)) {
@@ -106,15 +111,23 @@ function processCJKCharacters(input) {
             result += match
         }
 
+        // Add a space after the sequence if the next character is not a space or another CJK sequence
+        const nextChar = input[startIdx + match.length]
+        const nextCharIsCJK = /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]/.test(
+            nextChar,
+        )
+        if (nextChar && !nextCharIsCJK && nextChar !== ' ') {
+            result += ' '
+        }
+
         lastIdx = startIdx + match.length
     })
 
-    // append the remaining part of the original input
+    // Append the remaining part of the original input
     result += input.substring(lastIdx)
 
     return result
 }
-
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
  * puncation (although includes accented characters), numbers, and whitespace.
