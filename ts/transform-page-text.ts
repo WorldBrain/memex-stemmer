@@ -67,11 +67,53 @@ const removeDiacritics = (text = '') => {
 const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
 
 const removeLongWords = (text = '') => text.replace(longWords, ' ')
+
 const removeSingleCharacters = (text = '') =>
     text
         .split(' ')
-        .filter((word) => word.length !== 1)
+        .filter((word) => {
+            if (word.length !== 1) {
+                return true
+            }
+            // Check if the character is a CJK character
+            const cjkPattern = /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g
+            return cjkPattern.test(word)
+        })
         .join(' ')
+
+function processCJKCharacters(input) {
+    // Extract CJK characters using a regex pattern
+    const matches = input.match(
+        /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g,
+    )
+
+    if (!matches) {
+        return input
+    }
+
+    let result = ''
+    let lastIdx = 0
+    matches.forEach((match, idx) => {
+        const startIdx = input.indexOf(match, lastIdx)
+
+        // append the segment from the last index to the start of this match
+        result += input.substring(lastIdx, startIdx)
+
+        // If the matched sequence is Han ideographs, separate them with space
+        if (/[\u4E00-\u9FFF]+/.test(match)) {
+            result += [...match].join(' ')
+        } else {
+            result += match
+        }
+
+        lastIdx = startIdx + match.length
+    })
+
+    // append the remaining part of the original input
+    result += input.substring(lastIdx)
+
+    return result
+}
 
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
@@ -123,6 +165,9 @@ export const transformPageText: TextTransformer = (
     // Removes all words 20+ characters long
     // searchableText = removeLongWords(searchableText)
     searchableText = removeSingleCharacters(searchableText)
+
+    // Add this line to process CJK characters:
+    searchableText = processCJKCharacters(searchableText)
 
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
