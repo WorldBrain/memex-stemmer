@@ -104,8 +104,12 @@ function processCJKCharacters(input) {
             result += ' '
         }
 
-        // If the matched sequence is Han ideographs, separate them with space
-        if (/[\u4E00-\u9FFF]+/.test(match)) {
+        // If the matched sequence is Han ideographs, Hiragana, Katakana, Hangul, separate them with space
+        if (
+            /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+/.test(
+                match,
+            )
+        ) {
             result += [...match].join(' ')
         } else {
             result += match
