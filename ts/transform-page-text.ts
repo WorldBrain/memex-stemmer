@@ -1,5 +1,5 @@
-const urlRegex = require('url-regex') // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
-const sw = require('remove-stopwords')
+import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
+// import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
 
 import { DEFAULT_TERM_SEPARATOR } from './constants'
@@ -34,11 +34,11 @@ const cleanupWhitespaces = (text = '') =>
 export const removeDupeWords = (text = '') =>
     [...new Set(text.split(termSeparator))].join(' ')
 
-const removeUselessWords = (text = '', lang) => {
-    const oldString = text.split(termSeparator)
-    const newString = sw.removeStopwords(oldString, lang)
-    return newString.join(' ')
-}
+// const removeUselessWords = (text = '', lang) => {
+//     const oldString = text.split(termSeparator)
+//     const newString = sw.removeStopwords(oldString, lang)
+//     return newString.join(' ')
+// }
 
 const combinePunctuation = (text = '') => text.replace(apostrophePattern, '')
 
