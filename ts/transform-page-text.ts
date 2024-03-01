@@ -1,16 +1,19 @@
-const urlRegex = require('url-regex') // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
-const sw = require('remove-stopwords')
+import urlRegex from 'url-regex' // Check https://mathiasbynens.be/demo/url-regex for results RE: this pattern
+// import sw from 'remove-stopwords'
 import rmDiacritics from './remove-diacritics'
 
 import { DEFAULT_TERM_SEPARATOR } from './constants'
+import type { TextTransformer } from './types'
 
-const termSeparator = new RegExp(DEFAULT_TERM_SEPARATOR.source, 'gu')
+const termSeparator = DEFAULT_TERM_SEPARATOR
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
 const wantedDashPattern = /(\S+)-(\S+)/g
 const unwantedDashPattern = /\s+-\s+/g
+const unwantedDashPattern1 = /(\S+)-(\S+)/g
 const longWords = /\b\w{30,}\b/gi
+//const singleCharacters = /(?<!\S).(?!\S)\s*/
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
 const urlPattern = urlRegex()
 
@@ -31,11 +34,11 @@ const cleanupWhitespaces = (text = '') =>
 export const removeDupeWords = (text = '') =>
     [...new Set(text.split(termSeparator))].join(' ')
 
-const removeUselessWords = (text = '', lang) => {
-    const oldString = text.split(termSeparator)
-    const newString = sw.removeStopwords(oldString, lang)
-    return newString.join(' ')
-}
+// const removeUselessWords = (text = '', lang) => {
+//     const oldString = text.split(termSeparator)
+//     const newString = sw.removeStopwords(oldString, lang)
+//     return newString.join(' ')
+// }
 
 const combinePunctuation = (text = '') => text.replace(apostrophePattern, '')
 
@@ -49,7 +52,7 @@ const splitDashes = (text = '') => {
 
     // Split up dash-words, deriving new words to add to the text
     const newWords = matches
-        .map(match => match.split('-'))
+        .map((match) => match.split('-'))
         .reduce((a, b) => [...a, ...b])
         .join(' ')
 
@@ -65,16 +68,78 @@ const removeRandomDigits = (text = '') => text.replace(randomDigits, ' ')
 
 const removeLongWords = (text = '') => text.replace(longWords, ' ')
 
+const removeSingleCharacters = (text = '') =>
+    text
+        .split(' ')
+        .filter((word) => {
+            if (word.length !== 1) {
+                return true
+            }
+            // Check if the character is a CJK character
+            const cjkPattern = /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g
+            return cjkPattern.test(word)
+        })
+        .join(' ')
+
+function processCJKCharacters(input) {
+    // Extract CJK characters using a regex pattern
+    const matches = input.match(
+        /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g,
+    )
+
+    if (!matches) {
+        return input
+    }
+
+    let result = ''
+    let lastIdx = 0
+    matches.forEach((match, idx) => {
+        const startIdx = input.indexOf(match, lastIdx)
+
+        // Append the segment from the last index to the start of this match
+        result += input.substring(lastIdx, startIdx)
+
+        // Add a space if the previous character is not a space and not at the start
+        if (startIdx > 0 && input[startIdx - 1] !== ' ') {
+            result += ' '
+        }
+
+        // If the matched sequence is Han ideographs, Hiragana, Katakana, Hangul, separate them with space
+        if (
+            /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]+/.test(
+                match,
+            )
+        ) {
+            result += [...match].join(' ')
+        } else {
+            result += match
+        }
+
+        // Add a space after the sequence if the next character is not a space or another CJK sequence
+        const nextChar = input[startIdx + match.length]
+        const nextCharIsCJK = /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]/.test(
+            nextChar,
+        )
+        if (nextChar && !nextCharIsCJK && nextChar !== ' ') {
+            result += ' '
+        }
+
+        lastIdx = startIdx + match.length
+    })
+
+    // Append the remaining part of the original input
+    result += input.substring(lastIdx)
+
+    return result
+}
 /**
  * Takes in some text content and strips it of unneeded data. Currently does
  * puncation (although includes accented characters), numbers, and whitespace.
- * TODO: pass in options to disable certain functionality.
- *
- * @param {any} content A content string to transform.
- * @returns {any} Object containing the transformed `content` + less important
- *  `lengthBefore`, `lengthAfter` stats.
  */
-export default function transform({ text = '', lang = 'en' }) {
+export const transformPageText: TextTransformer = (
+    text,
+    { lang = 'en-US' } = {},
+) => {
     // Short circuit if no text
     if (!text.trim().length) {
         return { text, lenAfter: 0, lenBefore: 0 }
@@ -94,6 +159,10 @@ export default function transform({ text = '', lang = 'en' }) {
     // Example "chevron-right": "chevron right chevron-right"
     searchableText = splitDashes(searchableText)
 
+    // replaces remaining dashes
+    searchableText = searchableText.replace(unwantedDashPattern, ' ')
+    searchableText = searchableText.replace(unwantedDashPattern1, ' ')
+
     // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
 
@@ -105,17 +174,55 @@ export default function transform({ text = '', lang = 'en' }) {
     searchableText = removeRandomDigits(searchableText)
 
     // Removes 'stopwords' such as they'll, don't, however ect..
-    searchableText = removeUselessWords(searchableText, lang)
+    // searchableText = removeUselessWords(searchableText, lang)
+
+    // Removes 'stopwords' such as they'll, don't, however ect..
+    // searchableText = removeUselessWords(searchableText, lang)
+
+    // Removes all words 20+ characters long
+    // searchableText = removeLongWords(searchableText)
+    searchableText = removeSingleCharacters(searchableText)
+
+    // Add this line to process CJK characters:
+    searchableText = processCJKCharacters(searchableText)
 
     // We don't care about non-single-space whitespace (' ' is cool)
     searchableText = cleanupWhitespaces(searchableText)
-
-    // Removes all words 20+ characters long
-    searchableText = removeLongWords(searchableText)
 
     return {
         text: searchableText,
         lenBefore: text.length,
         lenAfter: searchableText.length,
+    }
+}
+
+export const transformListName: TextTransformer = (text) => {
+    // Short circuit if no text
+    if (!text.trim().length) {
+        return { text, lenAfter: 0, lenBefore: 0 }
+    }
+
+    let searchableName = text.toLocaleLowerCase()
+
+    // Removes ' from words effectively combining them
+    // Example O'Grady => OGrady
+    searchableName = combinePunctuation(searchableName)
+
+    // Splits words with - into separate words
+    // Example "chevron-right": "chevron right chevron-right"
+    searchableName = splitDashes(searchableName)
+
+    // Changes accented characters to regular letters
+    searchableName = removeDiacritics(searchableName)
+
+    searchableName = removeDupeWords(searchableName)
+
+    // We don't care about non-single-space whitespace (' ' is cool)
+    searchableName = cleanupWhitespaces(searchableName)
+
+    return {
+        text: searchableName,
+        lenBefore: text.length,
+        lenAfter: searchableName.length,
     }
 }
