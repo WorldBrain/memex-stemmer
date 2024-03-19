@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.6",
+    "linkedom": "^0.16.10",
     "url-regex": "^4.1.1"
   },
   "devDependencies": {
