@@ -1,6 +1,9 @@
 import { load } from 'cheerio'
 import type { TransformedText } from './types'
-import { transformPageHTML as _transformPageHTML } from './transform-page-html.common'
+import {
+    transformPageHTML as _transformPageHTML,
+    TEXT_EXTRACT_EL,
+} from './transform-page-html.common'
 
 export const transformPageHTML = ({
     html = '',
@@ -10,7 +13,7 @@ export const transformPageHTML = ({
     _transformPageHTML({
         html,
         performDOMManipulation: (html) => {
-            let text = `<textractwrapper>${html}<textractwrapper>`
+            let text = `<${TEXT_EXTRACT_EL}>${html}</${TEXT_EXTRACT_EL}>`
             const $ = load(text, { decodeEntities: false })
             $('script').remove()
             $('noscript').remove()
@@ -19,6 +22,6 @@ export const transformPageHTML = ({
 
             // Remove style only after removing hidden elements
             $('style').remove()
-            return $('textractwrapper').text()
+            return $(TEXT_EXTRACT_EL).text()
         },
     })

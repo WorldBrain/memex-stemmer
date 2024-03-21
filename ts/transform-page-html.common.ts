@@ -2,6 +2,8 @@ import type { TransformedText } from './types'
 
 const WHITELIST_STRIP_LINEBREAKS = /[^A-Za-z\x80-\xFF 0-9 \u2018\u2019\u201C|\u201D\u2026 \u00C0-\u1FFF \u2C00-\uD7FF \.,\?""!@#\$%\^&\*\(\)-_=\+;:<>\/\\\|\}\{\[\]`~'-\w]*/g // eslint-disable-line
 
+export const TEXT_EXTRACT_EL = 'textractwrapper'
+
 export function transformPageHTML({
     html = '',
     performDOMManipulation,
