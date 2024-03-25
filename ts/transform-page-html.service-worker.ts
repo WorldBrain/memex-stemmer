@@ -14,14 +14,18 @@ export const transformPageHTML = ({
         html,
         performDOMManipulation: (html) => {
             const { document: doc } = parseHTML(
-                `<${TEXT_EXTRACT_EL}${html}></${TEXT_EXTRACT_EL}>`,
+                `<${TEXT_EXTRACT_EL}>${html}</${TEXT_EXTRACT_EL}>`,
             )
+
             const removeEl = (el: any) => el.remove()
             doc.querySelectorAll('script').forEach(removeEl)
             doc.querySelectorAll('noscript').forEach(removeEl)
             doc.querySelectorAll('svg').forEach(removeEl)
             doc.querySelectorAll('select').forEach(removeEl)
             doc.querySelectorAll('style').forEach(removeEl)
-            return doc.querySelector(TEXT_EXTRACT_EL)?.textContent ?? ''
+            const textContent =
+                doc.querySelector(TEXT_EXTRACT_EL)?.textContent ?? ''
+
+            return textContent
         },
     })
