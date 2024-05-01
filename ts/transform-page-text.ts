@@ -81,7 +81,7 @@ const removeSingleCharacters = (text = '') =>
         })
         .join(' ')
 
-function processCJKCharacters(input) {
+export function processCJKCharacters(input) {
     // Extract CJK characters using a regex pattern
     const matches = input.match(
         /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g,
