@@ -9,9 +9,8 @@ const termSeparator = DEFAULT_TERM_SEPARATOR
 const allWhitespacesPattern = /\s+/g
 const nonWordsPattern = /[\u2000-\u206F\u2E00-\u2E7F\\!"#$%&()*+,./:;<=>?[\]^_`{|}~«»。（）ㅇ©ºø°]/gi
 const apostrophePattern = /['’]/g
-const wantedDashPattern = /(\S+)-(\S+)/g
+const wantedDashPattern = /(\w+)-(\w+)/g
 const unwantedDashPattern = /\s+-\s+/g
-const unwantedDashPattern1 = /(\S+)-(\S+)/g
 const longWords = /\b\w{30,}\b/gi
 //const singleCharacters = /(?<!\S).(?!\S)\s*/
 const randomDigits = /\b(\d{1,3}|\d{5,})\b/gi
@@ -161,7 +160,6 @@ export const transformPageText: TextTransformer = (
 
     // replaces remaining dashes
     searchableText = searchableText.replace(unwantedDashPattern, ' ')
-    searchableText = searchableText.replace(unwantedDashPattern1, ' ')
 
     // Changes accented characters to regular letters
     searchableText = removeDiacritics(searchableText)
