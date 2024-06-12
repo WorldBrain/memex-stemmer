@@ -30,7 +30,7 @@ const cleanupWhitespaces = (text = '') =>
  * @param {string|RegExp} [wordDelim=' '] Delimiter to split `input` into words.
  * @returns {string} Version of `text` param without duplicate words.
  */
-export const removeDupeWords = (text = '') =>
+export const removeDupeWords = (text: string = ''): string =>
     [...new Set(text.split(termSeparator))].join(' ')
 
 // const removeUselessWords = (text = '', lang) => {
@@ -80,7 +80,7 @@ const removeSingleCharacters = (text = '') =>
         })
         .join(' ')
 
-export function processCJKCharacters(input) {
+export function processCJKCharacters(input: string): string {
     // Extract CJK characters using a regex pattern
     const matches = input.match(
         /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF\u3000-\u303F]+/g,
@@ -145,7 +145,7 @@ export const transformPageText: TextTransformer = (
     }
 
     // Difference between browser and Node.js, so use .call() to supress type error
-    let searchableText = text.toLocaleLowerCase.call(text, lang)
+    let searchableText: string = text.toLocaleLowerCase.call(text, lang)
 
     // Remove URLs first before we start messing with things
     searchableText = removeUrls(searchableText)
