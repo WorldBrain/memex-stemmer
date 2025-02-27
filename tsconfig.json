@@ -12,6 +12,7 @@
         "declaration": true,
         "sourceMap": true,
         "esModuleInterop": true,
+        "skipLibCheck": true,
         "typeRoots": ["./node_modules/@types"],
         "downlevelIteration": true,
         "outDir": "lib"
